@@ -5,11 +5,11 @@ const { Client, GatewayIntentBits } = require("discord.js");
 
 const app = express();
 const allowedUsers = new Set();
-const adminUsers = new Set([OWNER_ID]); // сюда можно будет добавлять других админов
-
 // 🔑 Переменные окружения
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const OWNER_ID = "832278157066240040"; // ← твой Discord ID
+const adminUsers = new Set([OWNER_ID]); // сюда можно будет добавлять других админов
+
 
 // 🌐 Middleware
 app.use(cors());
