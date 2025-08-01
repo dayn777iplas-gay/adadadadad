@@ -56,11 +56,20 @@ client.on("messageCreate", (message) => {
     const isAdmin = message.author.id === OWNER_ID;
     const mention = message.mentions.users.first();
 
+    if (message.content === "/help") {
+    message.reply(
+        "**Доступные команды бота для выдачи подписки в скрипте Nerest Project:**\n" +
+        "`/выдать @user` — выдать подписку рабу\n" +
+        "`/спиздить @user` — спиздить подписку у раба(не заслужил)\n" +
+        "` https://discord.gg/saHwJfDH ` — дс сервер скрипта
+    );
+}
+
     if (message.content.startsWith("/выдать")) {
         if (!isAdmin) return message.reply("❌ У вас нет прав для этой команды.пошёл нахyi еблaн");
-        if (!mention) return message.reply("❌ Укажите героя: `/выдать @user`");
+        if (!mention) return message.reply("❌ Укажите раба: `/выдать @user`");
         allowedUsers.add(mention.id);
-        message.reply(`✅ Доступ выдан для <@${mention.id}> жду 100$`);
+        message.reply(`✅ Подписка выдана рабу <@${mention.id}> жду 100$`);
     }
 
     if (message.content.startsWith("/спиздить")) {
