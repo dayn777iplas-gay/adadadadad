@@ -72,42 +72,42 @@ client.on("messageCreate", (message) => {
     const isAdmin = message.author.id === OWNER_ID;
     const mention = message.mentions.users.first();
 
-    if (message.content === "/help") {
+    if (message.content === "!help") {
     message.reply(
         "**📜 Доступные команды Nerest Project Бота:**\n\n" +
         "**👑 Админские команды:**\n" +
-        "`/выдать @user` — выдать подписку рабу\n" +
-        "`/спиздить @user` — спиздить подписку у раба (не заслужил)\n" +
-        "`/проверить @user` — проверить наличие подписки у рабов\n" +
-        "`/список` — список всех рабов с подпиской\n\n" +
+        "`!выдать @user` — выдать подписку рабу\n" +
+        "`!спиздить @user` — спиздить подписку у раба (не заслужил)\n" +
+        "`!проверить @user` — проверить наличие подписки у рабов\n" +
+        "`!список` — список всех рабов с подпиской\n\n" +
         "**💬 Доступные всем пользователям:**\n" +
-        "`/бань @user` — бан раба в канале 😂\n" +
-        "`/муть @user` — мут раба в чате 🔇\n\n" +
+        "`!бань @user` — бан раба в канале 😂\n" +
+        "`!муть @user` — мут раба в чате 🔇\n\n" +
         "🔗 **Дискорд сервер скрипта:** https://discord.gg/saHwJfDH"
     );
 }
 
     // 👇 Все пользователи могут использовать
-if (message.content.startsWith("/бань")) {
+if (message.content.startsWith("!бань")) {
     const mention = message.mentions.users.first();
-    if (!mention) return message.reply("❌ Укажи, кого забанить: `/бань @user`");
+    if (!mention) return message.reply("❌ Укажи, кого забанить: `!бань @user`");
 
     message.reply(`🚫 <@${mention.id}> был забанен по причине: "Раб без подписки" 😂`);
 }
 
-if (message.content.startsWith("/муть")) {
+if (message.content.startsWith("!муть")) {
     const mention = message.mentions.users.first();
-    if (!mention) return message.reply("❌ Укажи, кого замутить: `/муть @user`");
+    if (!mention) return message.reply("❌ Укажи, кого замутить: `!муть @user`");
 
     message.reply(`🔇 <@${mention.id}> был замучен. Больше ни слова от этого раба.`);
 }
 
 // 👇 Только для админа
-if (message.content.startsWith("/проверить")) {
+if (message.content.startsWith("!проверить")) {
     if (!isAdmin) return message.reply("❌ Ты не админ, пошёл нахyi");
 
     const mention = message.mentions.users.first();
-    if (!mention) return message.reply("❌ Укажи пользователя: `/проверить @user`");
+    if (!mention) return message.reply("❌ Укажи пользователя: `!проверить @user`");
 
     if (allowedUsers.has(mention.id)) {
         message.reply(`✅ У <@${mention.id}> есть доступ к скрипту.`);
@@ -116,7 +116,7 @@ if (message.content.startsWith("/проверить")) {
     }
 }
 
-if (message.content === "/список") {
+if (message.content === "!список") {
     if (!isAdmin) return message.reply("❌ Ты не админ, пошёл нахyi");
 
     if (allowedUsers.size === 0) {
@@ -127,16 +127,16 @@ if (message.content === "/список") {
     message.reply(`📋 Подписанные рабы:\n${list}`);
 }
 
-    if (message.content.startsWith("/выдать")) {
+    if (message.content.startsWith("!выдать")) {
         if (!isAdmin) return message.reply("❌ У вас нет прав для этой команды.пошёл нахyi еблaн");
-        if (!mention) return message.reply("❌ Укажите раба: `/выдать @user`");
+        if (!mention) return message.reply("❌ Укажите раба: `!выдать @user`");
         allowedUsers.add(mention.id);
         message.reply(`✅ Подписка выдана рабу <@${mention.id}> жду 100$`);
     }
 
-    if (message.content.startsWith("/спиздить")) {
+    if (message.content.startsWith("!спиздить")) {
         if (!isAdmin) return message.reply("❌ У вас нет прав для этой команды.пошёл нахyi еблaн");
-        if (!mention) return message.reply("❌ Укажите пользователя у которого спиздить подписку: `/спиздить @user`");
+        if (!mention) return message.reply("❌ Укажите пользователя у которого спиздить подписку: `!спиздить @user`");
         if (allowedUsers.delete(mention.id)) {
             message.reply(`❌ Подписку спиздили у <@${mention.id}>`);
         } else {
