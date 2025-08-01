@@ -57,14 +57,14 @@ client.on("messageCreate", (message) => {
     const mention = message.mentions.users.first();
 
     if (message.content.startsWith("!разрешить")) {
-        if (!isAdmin) return message.reply("❌ У вас нет прав для этой команды.");
+        if (!isAdmin) return message.reply("❌ У вас нет прав для этой команды.пошёл нахyi");
         if (!mention) return message.reply("❌ Укажите пользователя: `!разрешить @user`");
         allowedUsers.add(mention.id);
         message.reply(`✅ Доступ выдан для <@${mention.id}>`);
     }
 
     if (message.content.startsWith("!забрать")) {
-        if (!isAdmin) return message.reply("❌ У вас нет прав для этой команды.");
+        if (!isAdmin) return message.reply("❌ У вас нет прав для этой команды.пошёл нахyi");
         if (!mention) return message.reply("❌ Укажите пользователя: `!забрать @user`");
         if (allowedUsers.delete(mention.id)) {
             message.reply(`❌ Доступ отозван у <@${mention.id}>`);
@@ -74,6 +74,10 @@ client.on("messageCreate", (message) => {
     }
 });
 
+// Живой маршрут для self-ping (и UptimeRobot)
+app.get("/", (req, res) => {
+  res.send("✅ Nerest Project API работает");
+});
 // 🚀 Запуск
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
