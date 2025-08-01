@@ -129,13 +129,17 @@ if (message.content === "!починить") {
 
 // 💬 Команда !ктораб
 if (message.content === "!ктораб") {
-    const members = await message.guild.members.fetch();
-    const randomMember = members.filter(m => !m.user.bot).random();
-    if (randomMember) {
-        return message.reply(`👑 Сегодняшний раб дня: <@${randomMember.id}>`);
-    } else {
-        return message.reply("❌ Не удалось найти рабов.");
-    }
+    (async () => {
+        const members = await message.guild.members.fetch();
+        const nonBotMembers = members.filter(m => !m.user.bot);
+        const randomMember = nonBotMembers.random();
+
+        if (randomMember) {
+            message.channel.send(`Сегодняшний раб дня: ${randomMember}`);
+        } else {
+            message.channel.send("Не удалось выбрать раба дня 😔");
+        }
+    })();
 }
 
 // 💬 Команда !дуэль @user
