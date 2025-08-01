@@ -70,7 +70,7 @@ client.on("ready", () => {
 client.on("messageCreate", (message) => {
     if (message.author.bot) return;
 
-    const isAdmin = adminUsers.has(message.author.id);
+    isAdmin = adminUsers.has(message.author.id);
     const mention = message.mentions.users.first();
     const isAdmin = adminUsers.has(message.author.id); // новая проверка
 
