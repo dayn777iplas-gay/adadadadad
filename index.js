@@ -56,20 +56,20 @@ client.on("messageCreate", (message) => {
     const isAdmin = message.author.id === OWNER_ID;
     const mention = message.mentions.users.first();
 
-    if (message.content.startsWith("!разрешить")) {
-        if (!isAdmin) return message.reply("❌ У вас нет прав для этой команды.пошёл нахyi");
-        if (!mention) return message.reply("❌ Укажите пользователя: `!разрешить @user`");
+    if (message.content.startsWith("/выдать")) {
+        if (!isAdmin) return message.reply("❌ У вас нет прав для этой команды.пошёл нахyi еблaн");
+        if (!mention) return message.reply("❌ Укажите героя: `/выдать @user`");
         allowedUsers.add(mention.id);
-        message.reply(`✅ Доступ выдан для <@${mention.id}>`);
+        message.reply(`✅ Доступ выдан для <@${mention.id}> жду 100$`);
     }
 
-    if (message.content.startsWith("!забрать")) {
-        if (!isAdmin) return message.reply("❌ У вас нет прав для этой команды.пошёл нахyi");
-        if (!mention) return message.reply("❌ Укажите пользователя: `!забрать @user`");
+    if (message.content.startsWith("/спиздить")) {
+        if (!isAdmin) return message.reply("❌ У вас нет прав для этой команды.пошёл нахyi еблaн");
+        if (!mention) return message.reply("❌ Укажите пользователя у которого спиздить подписку: `/спиздить @user`");
         if (allowedUsers.delete(mention.id)) {
-            message.reply(`❌ Доступ отозван у <@${mention.id}>`);
+            message.reply(`❌ Подписку спиздили у <@${mention.id}>`);
         } else {
-            message.reply(`ℹ️ У <@${mention.id}> не было доступа`);
+            message.reply(`ℹ️ У <@${mention.id}> не было доступа, ну всё пиздец тебе...`);
         }
     }
 });
