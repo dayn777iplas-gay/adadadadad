@@ -48,6 +48,22 @@ const client = new Client({
 
 client.on("ready", () => {
     console.log(`🤖 Бот ${client.user.tag} запущен`);
+
+    const statuses = [
+        { name: "Выдает подписку рабам", type: 0 },        // Играет в
+        { name: "Пишет скрипт Nerest Project", type: 0 },  // Играет в
+        { name: "рабов", type: 2 },                        // Слушает
+        { name: "на рабов", type: 3 },                     // Смотрит
+    ];
+
+    let i = 0;
+    setInterval(() => {
+        client.user.setPresence({
+            activities: [statuses[i]],
+            status: "online"
+        });
+        i = (i + 1) % statuses.length;
+    }, 10000); // меняет статус каждые 10 секунд
 });
 
 client.on("messageCreate", (message) => {
@@ -58,11 +74,57 @@ client.on("messageCreate", (message) => {
 
     if (message.content === "/help") {
     message.reply(
-        "**Доступные команды бота для выдачи подписки в скрипте Nerest Project:**\n" +
+        "**📜 Доступные команды Nerest Project Бота:**\n\n" +
+        "**👑 Админские команды:**\n" +
         "`/выдать @user` — выдать подписку рабу\n" +
         "`/спиздить @user` — спиздить подписку у раба (не заслужил)\n" +
-        "🔗 Дискорд сервер скрипта: https://discord.gg/saHwJfDH"
+        "`/проверить @user` — проверить наличие подписки у рабов\n" +
+        "`/список` — список всех рабов с подпиской\n\n" +
+        "**💬 Доступные всем пользователям:**\n" +
+        "`/бань @user` — бан раба в канале 😂\n" +
+        "`/муть @user` — мут раба в чате 🔇\n\n" +
+        "🔗 **Дискорд сервер скрипта:** https://discord.gg/saHwJfDH"
     );
+}
+
+    // 👇 Все пользователи могут использовать
+if (message.content.startsWith("/бань")) {
+    const mention = message.mentions.users.first();
+    if (!mention) return message.reply("❌ Укажи, кого забанить: `/бань @user`");
+
+    message.reply(`🚫 <@${mention.id}> был забанен по причине: "Раб без подписки" 😂`);
+}
+
+if (message.content.startsWith("/муть")) {
+    const mention = message.mentions.users.first();
+    if (!mention) return message.reply("❌ Укажи, кого замутить: `/муть @user`");
+
+    message.reply(`🔇 <@${mention.id}> был замучен. Больше ни слова от этого раба.`);
+}
+
+// 👇 Только для админа
+if (message.content.startsWith("/проверить")) {
+    if (!isAdmin) return message.reply("❌ Ты не админ, пошёл нахyi");
+
+    const mention = message.mentions.users.first();
+    if (!mention) return message.reply("❌ Укажи пользователя: `/проверить @user`");
+
+    if (allowedUsers.has(mention.id)) {
+        message.reply(`✅ У <@${mention.id}> есть доступ к скрипту.`);
+    } else {
+        message.reply(`❌ У <@${mention.id}> нет подписки.`);
+    }
+}
+
+if (message.content === "/список") {
+    if (!isAdmin) return message.reply("❌ Ты не админ, пошёл нахyi");
+
+    if (allowedUsers.size === 0) {
+        return message.reply("📭 Ни один раб ещё не получил подписку.");
+    }
+
+    const list = [...allowedUsers].map(id => `<@${id}>`).join("\n");
+    message.reply(`📋 Подписанные рабы:\n${list}`);
 }
 
     if (message.content.startsWith("/выдать")) {
