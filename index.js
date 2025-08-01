@@ -126,6 +126,18 @@ if (message.content === "!починить") {
     return message.reply("✅ Все баги устранены. Кроме одного... тебя.");
 }
 
+if (message.content.startsWith("!понизить")) {
+    if (message.author.id !== OWNER_ID) return message.reply("❌ Только главный рабовладелец может понижать.");
+    if (!mention) return message.reply("❌ Укажи работорговца: `!понизить @user`");
+    if (mention.id === OWNER_ID) return message.reply("❌ Себя не понизишь, царь.");
+
+    if (adminUsers.delete(mention.id)) {
+        message.reply(`☠️ <@${mention.id}> больше не работорговец.`);
+    } else {
+        message.reply(`ℹ️ <@${mention.id}> не был работорговцем.`);
+    }
+}
+
 // 💬 Команда !ктораб
 if (message.content === "!ктораб") {
     (async () => {
@@ -173,13 +185,12 @@ if (message.content === "!обнулить") {
 if (message.content === "!список") {
     if (!isAdmin) return message.reply("❌ Ты не админ, пошёл нахyi");
 
-    if (allowedUsers.size === 0) {
-        return message.reply("📭 Ни один раб ещё не получил подписку.");
-    }
+    const admins = [...adminUsers].map(id => `<@${id}>`).join("\n") || "🚫 Никого";
+    const slaves = [...allowedUsers].filter(id => !adminUsers.has(id)).map(id => `<@${id}>`).join("\n") || "🚫 Никого";
 
-    const list = [...allowedUsers].map(id => `<@${id}>`).join("\n");
-    message.reply(`📋 Подписанные рабы:\n${list}`);
+    message.reply(`📋 **Работорговцы:**\n${admins}\n\n📋 **Рабы с подпиской:**\n${slaves}`);
 }
+
 
     if (message.content.startsWith("!выдать")) {
         if (!isAdmin) return message.reply("❌ У вас нет прав для этой команды.пошёл нахyi еблaн");
