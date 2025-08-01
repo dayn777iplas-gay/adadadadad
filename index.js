@@ -70,10 +70,9 @@ client.on("ready", () => {
 client.on("messageCreate", (message) => {
     if (message.author.bot) return;
 
-    let isAdmin = adminUsers.has(message.author.id);
+    const isAdmin = adminUsers.has(message.author.id);
     const mention = message.mentions.users.first();
-    const isAdmin = adminUsers.has(message.author.id); // новая проверка
-
+    
 if (message.content === "!ктоя") {
     const randomId = Math.floor(Math.random() * 900) + 100;
     message.reply(`Ты — раб №${randomId} из моей коллекции 🧠`);
