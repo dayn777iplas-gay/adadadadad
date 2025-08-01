@@ -30,7 +30,7 @@ app.get("/", (req, res) => {
 
 // 🔁 Self-ping (30 сек) для логов Koyeb (не обязателен)
 setInterval(() => {
-    https.get("https://nerest-project.koyeb.app/", res => {
+    https.get("https://expected-kara-lynn-anus23323-840ae195.koyeb.app/", res => {
         console.log("🔁 Self-ping:", res.statusCode);
     }).on("error", err => {
         console.error("❌ Self-ping error:", err.message);
