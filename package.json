@@ -1,7 +1,6 @@
 {
   "name": "nerest-project",
   "version": "1.0.0",
-  "description": "Discord bot + API for Nerest Project",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -13,8 +12,5 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "MIT"
+  }
 }
