@@ -5,6 +5,7 @@ const { Client, GatewayIntentBits } = require("discord.js");
 
 const app = express();
 const allowedUsers = new Set();
+const adminUsers = new Set([OWNER_ID]); // сюда можно будет добавлять других админов
 
 // 🔑 Переменные окружения
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -69,8 +70,22 @@ client.on("ready", () => {
 client.on("messageCreate", (message) => {
     if (message.author.bot) return;
 
-    const isAdmin = message.author.id === OWNER_ID;
+    const isAdmin = adminUsers.has(message.author.id);
     const mention = message.mentions.users.first();
+    const isAdmin = adminUsers.has(message.author.id); // новая проверка
+
+if (message.content === "!ктоя") {
+    const randomId = Math.floor(Math.random() * 900) + 100;
+    message.reply(`Ты — раб №${randomId} из моей коллекции 🧠`);
+}
+
+if (message.content.startsWith("!повысить")) {
+    if (message.author.id !== OWNER_ID) return message.reply("❌ Ты не главный рабовладелец.");
+    if (!mention) return message.reply("❌ Укажи пользователя: `!повысить @user`");
+    adminUsers.add(mention.id);
+    message.reply(`✅ <@${mention.id}> теперь тоже может управлять рабами!`);
+}
+
 
     if (message.content === "!help") {
     message.reply(
@@ -79,14 +94,20 @@ client.on("messageCreate", (message) => {
         "`!выдать @user` — выдать подписку рабу\n" +
         "`!спиздить @user` — спиздить подписку у раба (не заслужил)\n" +
         "`!проверить @user` — проверить наличие подписки у рабов\n" +
-        "`!список` — список всех рабов с подпиской\n\n" +
+        "`!список` — список всех рабов с подпиской\n" +
+        "`!обнулить` — обнулить весь список рабов 👹\n" +
+        "`!повысить @user` — дать другому рабовладельцу админ-доступ 👑\n\n" +
         "**💬 Доступные всем пользователям:**\n" +
         "`!бань @user` — бан раба в канале 😂\n" +
-        "`!муть @user` — мут раба в чате 🔇\n\n" +
+        "`!муть @user` — мут раба в чате 🔇\n" +
+        "`!ктораб` — случайный раб дня 👀\n" +
+        "`!дуэль @user` — дуэль на выживание ⚔️\n" +
+        "`!починить` — починить всё (кроме тебя)\n" +
+        "`!ктоя` — узнать, кто ты в системе бота 🧠\n\n" +
         "🔗 **Дискорд сервер скрипта:** https://discord.gg/saHwJfDH"
     );
 }
-
+    
     // 👇 Все пользователи могут использовать
 if (message.content.startsWith("!бань")) {
     const mention = message.mentions.users.first();
@@ -101,6 +122,30 @@ if (message.content.startsWith("!муть")) {
 
     message.reply(`🔇 <@${mention.id}> был замучен. Больше ни слова от этого раба.`);
 }
+// 💬 Команда !починить
+if (message.content === "!починить") {
+    return message.reply("✅ Все баги устранены. Кроме одного... тебя.");
+}
+
+// 💬 Команда !ктораб
+if (message.content === "!ктораб") {
+    const members = await message.guild.members.fetch();
+    const randomMember = members.filter(m => !m.user.bot).random();
+    if (randomMember) {
+        return message.reply(`👑 Сегодняшний раб дня: <@${randomMember.id}>`);
+    } else {
+        return message.reply("❌ Не удалось найти рабов.");
+    }
+}
+
+// 💬 Команда !дуэль @user
+if (message.content.startsWith("!дуэль")) {
+    const opponent = message.mentions.users.first();
+    if (!opponent) return message.reply("❌ Укажи с кем дуэль: `!дуэль @user`");
+
+    const winner = Math.random() < 0.5 ? message.author : opponent;
+    return message.reply(`⚔️ Дуэль завершена! Победил(а) ${winner}.`);
+}
 
 // 👇 Только для админа
 if (message.content.startsWith("!проверить")) {
@@ -114,6 +159,12 @@ if (message.content.startsWith("!проверить")) {
     } else {
         message.reply(`❌ У <@${mention.id}> нет подписки.`);
     }
+}
+
+if (message.content === "!обнулить") {
+    if (message.author.id !== OWNER_ID) return message.reply("❌ У тебя нет прав, смертный.");
+    allowedUsers.clear();
+    return message.reply("💀 Все рабы освобождены... *со смехом злодея*");
 }
 
 if (message.content === "!список") {
