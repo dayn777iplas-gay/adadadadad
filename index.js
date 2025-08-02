@@ -9,6 +9,19 @@ const allowedUsers = new Set();
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const OWNER_ID = "832278157066240040"; // ← твой Discord ID
 const adminUsers = new Set([OWNER_ID]); // сюда можно будет добавлять других админов
+const fs = require("fs");
+
+function loadJSON(filename) {
+    try {
+        return JSON.parse(fs.readFileSync(filename, "utf-8"));
+    } catch {
+        return {};
+    }
+}
+
+function saveJSON(filename, obj) {
+    fs.writeFileSync(filename, JSON.stringify(obj, null, 2), "utf-8");
+}
 
 
 // 🌐 Middleware
@@ -184,14 +197,40 @@ if (message.content === "!обнулить") {
 }
 
 if (message.content === "!список") {
-    if (!isAdmin) return message.reply("❌ Ты не админ, пошёл нахyi");
+    if (!isAdmin) return;
 
-    const admins = [...adminUsers].map(id => `<@${id}>`).join("\n") || "🚫 Никого";
-    const slaves = [...allowedUsers].filter(id => !adminUsers.has(id)).map(id => `<@${id}>`).join("\n") || "🚫 Никого";
+    (async () => {
+        const guild = message.guild;
+        const onlineThreshold = 5 * 60 * 1000;
+        const now = Date.now();
 
-    message.reply(`📋 **Работорговцы:**\n${admins}\n\n📋 **Рабы с подпиской:**\n${slaves}`);
+        const slaveList = [];
+        const ownerList = [];
+
+        for (const id of adminUsers) {
+            const member = await guild.members.fetch(id).catch(() => null);
+            if (member) {
+                ownerList.push(`<@${id}>`);
+            }
+        }
+
+        for (const id of allowedUsers) {
+            if (adminUsers.has(id)) continue;
+
+            const member = await guild.members.fetch(id).catch(() => null);
+            if (member) {
+                const seen = lastSeen[id] || 0;
+                const status = now - seen < onlineThreshold ? "🟢 Онлайн" : "🔴 Оффлайн";
+                slaveList.push(`<@${id}> — ${status}`);
+            }
+        }
+
+        message.reply(
+            `**📋 Работорговцы:**\n${ownerList.join("\n") || "Нет"}\n\n` +
+            `**📋 Рабы с подпиской:**\n${slaveList.join("\n") || "Нет"}`
+        );
+    })();
 }
-
 
     if (message.content.startsWith("!выдать")) {
         if (!isAdmin) return message.reply("❌ У вас нет прав для этой команды.пошёл нахyi еблaн");
@@ -217,8 +256,22 @@ app.get("/", (req, res) => {
 });
 // 🚀 Запуск
 const PORT = process.env.PORT || 3000;
+const lastSeen = loadJSON("lastSeen.json");
+
+app.post("/heartbeat", (req, res) => {
+    const { discord_id, timestamp } = req.body;
+    if (discord_id && timestamp) {
+        lastSeen[discord_id] = timestamp;
+        saveJSON("lastSeen.json", lastSeen);
+        res.json({ ok: true });
+    } else {
+        res.status(400).json({ error: "Invalid data" });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`🌐 API слушает на порту ${PORT}`);
 });
 
 client.login(BOT_TOKEN);
+
