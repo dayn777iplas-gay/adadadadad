@@ -44,7 +44,7 @@ app.get("/", (req, res) => {
 
 // 🔁 Self-ping (30 сек) для логов Koyeb (не обязателен)
 setInterval(() => {
-    https.get("https://expected-kara-lynn-anus23323-840ae195.koyeb.app/", res => {
+    https.get("https://adadadadad-97sj.onrender.com/", res => {
         console.log("🔁 Self-ping:", res.statusCode);
     }).on("error", err => {
         console.error("❌ Self-ping error:", err.message);
@@ -274,4 +274,5 @@ app.listen(PORT, () => {
 });
 
 client.login(BOT_TOKEN);
+
 
