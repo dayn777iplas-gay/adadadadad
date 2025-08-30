@@ -6,11 +6,12 @@ const PORT = process.env.PORT || 3000;
 let data = { users: {}, mutes: {} };
 const DATA_FILE = "data.json";
 
+// Загружаем данные с диска
 if (fs.existsSync(DATA_FILE)) {
   data = JSON.parse(fs.readFileSync(DATA_FILE));
 }
 
-// Сохраняем данные в файл
+// Сохраняем данные на диск
 function saveData() {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
@@ -18,12 +19,14 @@ function saveData() {
 const wss = new WebSocket.Server({ port: PORT });
 console.log(`WebSocket сервер запущен на порту ${PORT}`);
 
+// Отправка сообщения всем кроме отправителя
 function broadcast(msg, except=null) {
   wss.clients.forEach(c => {
     if (c.readyState === WebSocket.OPEN && c !== except) c.send(msg);
   });
 }
 
+// Проверка мьюта
 function isMuted(nick) {
   if (!data.mutes[nick]) return false;
   const now = Date.now();
