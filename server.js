@@ -37,7 +37,7 @@ wss.on("connection", ws => {
   ws.nick = null;
   ws.isAdmin = false;
 
-  ws.send("[nerchat] Подключено! Для регистрации: /register Ник Пароль");
+  ws.send("[Система] Подключено! Для регистрации: /register Ник Пароль");
 
   ws.on("message", msg => {
     const text = msg.toString().trim();
@@ -45,24 +45,26 @@ wss.on("connection", ws => {
     // Регистрация
     if (text.startsWith("/register ")) {
       const parts = text.split(" ");
-      if (parts.length < 3) return ws.send("[nerchat] Использование: /register Ник Пароль");
+      if (parts.length < 3) return ws.send("[Система] Использование: /register Ник Пароль");
       const nick = parts[1];
       const pass = parts.slice(2).join(" ");
-      if (data.users[nick]) return ws.send("[nerchat] Этот ник уже занят!");
-      data.users[nick] = { password: pass, regDate: Date.now() };
+      if (data.users[nick]) return ws.send("[Система] Этот ник уже занят!");
+      data.users[nick] = { password: pass, regDate: Date.now(), lastLogin: null };
       saveData();
-      ws.send(`[nerchat] Регистрация успешна! Ваш ник: ${nick}`);
+      ws.send(`[Система] Регистрация успешна! Ваш ник: ${nick}`);
       return;
     }
 
     // Логин
     if (text.startsWith("/login ")) {
       const parts = text.split(" ");
-      if (parts.length < 3) return ws.send("[nerchat] Использование: /login Ник Пароль");
+      if (parts.length < 3) return ws.send("[Система] Использование: /login Ник Пароль");
       const nick = parts[1];
       const pass = parts.slice(2).join(" ");
-      if (!data.users[nick] || data.users[nick].password !== pass) return ws.send("[nerchat] Неверный ник или пароль!");
+      if (!data.users[nick] || data.users[nick].password !== pass) return ws.send("[Система] Неверный ник или пароль!");
       ws.nick = nick;
+      data.users[nick].lastLogin = Date.now(); // сохраняем последний вход
+      saveData();
       ws.send(`[Система] Вы вошли как ${nick}`);
       return;
     }
@@ -72,54 +74,56 @@ wss.on("connection", ws => {
       const pass = text.slice(10).trim();
       if (pass === "123456789Q") {
         ws.isAdmin = true;
-        ws.send("[nerchat] Вы получили права администратора!");
+        ws.send("[Система] Вы получили права администратора!");
       } else {
-        ws.send("[nerchat] Неверный пароль администратора.");
+        ws.send("[Система] Неверный пароль администратора.");
       }
       return;
     }
 
     // Мут
     if (text.startsWith("/мут ")) {
-      if (!ws.isAdmin) return ws.send("[nerchat] Команда доступна только администратору.");
+      if (!ws.isAdmin) return ws.send("[Система] Команда доступна только администратору.");
       const parts = text.split(" ");
-      if (parts.length < 3) return ws.send("[nerchat] Использование: /мут Ник ВремяВМинуты");
+      if (parts.length < 3) return ws.send("[Система] Использование: /мут Ник ВремяВМинуты");
       const target = parts[1];
       const minutes = parseInt(parts[2]);
-      if (!data.users[target]) return ws.send("[nerchat] Игрок не найден!");
+      if (!data.users[target]) return ws.send("[Система] Игрок не найден!");
       const until = Date.now() + minutes*60*1000;
       data.mutes[target] = until;
       saveData();
-      ws.send(`[nerchat] Игрок ${target} замьючен на ${minutes} мин.`);
-      broadcast(`[nerchat] Игрок ${target} был замьючен админом.`, ws);
+      ws.send(`[Система] Игрок ${target} замьючен на ${minutes} мин.`);
+      broadcast(`[Система] Игрок ${target} был замьючен админом.`, ws);
       return;
     }
 
     // Размут
     if (text.startsWith("/размут ")) {
-      if (!ws.isAdmin) return ws.send("[nerchat-admin] Команда доступна только администратору.");
+      if (!ws.isAdmin) return ws.send("[Система] Команда доступна только администратору.");
       const parts = text.split(" ");
-      if (parts.length < 2) return ws.send("[nerchat-admin] Использование: /размут Ник");
+      if (parts.length < 2) return ws.send("[Система] Использование: /размут Ник");
       const target = parts[1];
-      if (!data.users[target]) return ws.send("[nerchat-admin] Игрок не найден!");
-      if (!data.mutes[target]) return ws.send("[nerchat-admin] Этот игрок не замьючен!");
+      if (!data.users[target]) return ws.send("[Система] Игрок не найден!");
+      if (!data.mutes[target]) return ws.send("[Система] Этот игрок не замьючен!");
       delete data.mutes[target];
       saveData();
-      ws.send(`[nerchat-admin] Игрок ${target} был размьючен.`);
-      broadcast(`[nerchat-admin] Игрок ${target} был размьючен админом.`, ws);
+      ws.send(`[Система] Игрок ${target} был размьючен.`);
+      broadcast(`[Система] Игрок ${target} был размьючен админом.`, ws);
       return;
     }
 
     // Профиль
     if (text.startsWith("/профиль ")) {
       const parts = text.split(" ");
-      if (parts.length < 2) return ws.send("[nerchat-admin] Использование: /профиль Ник");
+      if (parts.length < 2) return ws.send("[Система] Использование: /профиль Ник");
       const target = parts[1];
-      if (!data.users[target]) return ws.send("[nerchat-admin] Пользователь не найден!");
       const user = data.users[target];
+      if (!user) return ws.send("[Система] Пользователь не найден!");
+
       const regDate = new Date(user.regDate).toLocaleString();
-      let status = "обычный";
-      if (ws.isAdmin && ws.nick === target) status = "админ";
+      const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleString() : "никогда";
+      const status = (ws.isAdmin && ws.nick === target) ? "админ" : "обычный";
+
       let muteInfo = "нет";
       if (data.mutes[target]) {
         const now = Date.now();
@@ -129,15 +133,17 @@ wss.on("connection", ws => {
           muteInfo = `замьючен ещё ${min} мин.`;
         }
       }
+
       ws.send(`[Профиль] Ник: ${target}`);
-      ws.send(`[Профиль] Дата регистрации: ${regDate}`);
       ws.send(`[Профиль] Статус: ${status}`);
+      ws.send(`[Профиль] Дата регистрации: ${regDate}`);
+      ws.send(`[Профиль] Последний вход: ${lastLogin}`);
       ws.send(`[Профиль] Мут: ${muteInfo}`);
       return;
     }
 
-    if (!ws.nick) return ws.send("[nerchat] Сначала войдите через /login Ник Пароль");
-    if (isMuted(ws.nick)) return ws.send("[nerchat] Вы замьючены и не можете писать сообщения.");
+    if (!ws.nick) return ws.send("[Система] Сначала войдите через /login Ник Пароль");
+    if (isMuted(ws.nick)) return ws.send("[Система] Вы замьючены и не можете писать сообщения.");
 
     broadcast(`${ws.nick}: ${text}`);
   });
