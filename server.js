@@ -51,7 +51,7 @@ wss.on("connection", ws => {
       if (data.users[nick]) return ws.send("[nerchat] Этот ник уже занят!");
       data.users[nick] = { password: pass, regDate: Date.now() };
       saveData();
-      ws.send(`[Система] Регистрация успешна! Ваш ник: ${nick}`);
+      ws.send(`[nerchat] Регистрация успешна! Ваш ник: ${nick}`);
       return;
     }
 
@@ -72,9 +72,9 @@ wss.on("connection", ws => {
       const pass = text.slice(10).trim();
       if (pass === "123456789Q") {
         ws.isAdmin = true;
-        ws.send("[nerchat-admin] Вы получили права администратора!");
+        ws.send("[nerchat] Вы получили права администратора!");
       } else {
-        ws.send("[nerchat-admin] Неверный пароль администратора.");
+        ws.send("[nerchat] Неверный пароль администратора.");
       }
       return;
     }
@@ -95,12 +95,27 @@ wss.on("connection", ws => {
       return;
     }
 
+    // Размут
+    if (text.startsWith("/размут ")) {
+      if (!ws.isAdmin) return ws.send("[nerchat-admin] Команда доступна только администратору.");
+      const parts = text.split(" ");
+      if (parts.length < 2) return ws.send("[nerchat-admin] Использование: /размут Ник");
+      const target = parts[1];
+      if (!data.users[target]) return ws.send("[nerchat-admin] Игрок не найден!");
+      if (!data.mutes[target]) return ws.send("[nerchat-admin] Этот игрок не замьючен!");
+      delete data.mutes[target];
+      saveData();
+      ws.send(`[nerchat-admin] Игрок ${target} был размьючен.`);
+      broadcast(`[nerchat-admin] Игрок ${target} был размьючен админом.`, ws);
+      return;
+    }
+
     // Профиль
     if (text.startsWith("/профиль ")) {
       const parts = text.split(" ");
-      if (parts.length < 2) return ws.send("[nerchat] Использование: /профиль Ник");
+      if (parts.length < 2) return ws.send("[nerchat-admin] Использование: /профиль Ник");
       const target = parts[1];
-      if (!data.users[target]) return ws.send("[nerchat] Пользователь не найден!");
+      if (!data.users[target]) return ws.send("[nerchat-admin] Пользователь не найден!");
       const user = data.users[target];
       const regDate = new Date(user.regDate).toLocaleString();
       let status = "обычный";
@@ -114,10 +129,10 @@ wss.on("connection", ws => {
           muteInfo = `замьючен ещё ${min} мин.`;
         }
       }
-      ws.send(`[Профиль-nerchat] Ник: ${target}`);
-      ws.send(`[Профиль-nerchat] Дата регистрации: ${regDate}`);
-      ws.send(`[Профиль-nerchat] Статус: ${status}`);
-      ws.send(`[Профиль-nerchat] Мут: ${muteInfo}`);
+      ws.send(`[Профиль] Ник: ${target}`);
+      ws.send(`[Профиль] Дата регистрации: ${regDate}`);
+      ws.send(`[Профиль] Статус: ${status}`);
+      ws.send(`[Профиль] Мут: ${muteInfo}`);
       return;
     }
 
