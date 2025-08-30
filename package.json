@@ -1,13 +1,11 @@
 {
-  "name": "nerest-project",
+  "name": "chat-server",
   "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
+  "main": "server.js",
   "dependencies": {
-    "discord.js": "^14.11.0",
-    "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "ws": "^8.18.0"
+  },
+  "scripts": {
+    "start": "node server.js"
   }
 }
